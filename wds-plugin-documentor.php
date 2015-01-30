@@ -2,11 +2,10 @@
 /**
  * Plugin Name: WDS Plugin Documentor
  * Plugin URI:  http://webdevstudios.com/
- * Description: Allows developers to provide information to their clients about installed plugins.  Multi-site comptabitle.
+ * Description: Allows developers to provide information to their clients about installed plugins.  Multi-site compatible.
  * Version:     0.1.0
  * Author:      WebDevStudios, Jay Wood
  * Author URI:  http://webdevstudios.com
- * Donate link: http://webdevstudios.com/
  * License:     GPLv2+
  * Text Domain: wds_plugin_documentor
  * Domain Path: /languages

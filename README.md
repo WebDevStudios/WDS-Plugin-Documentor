@@ -6,11 +6,11 @@
 **License:**           GPLv2 or later  
 **License URI:**       http://www.gnu.org/licenses/gpl-2.0.html  
 
-Allows developers to provide information to their clients about installed plugins.  Multi-site comptabitle.
+Allows developers to provide information to their clients about installed plugins.  Multi-site compatible.
 
 ## Description ##
 
-This plugin will allow developers to provide documentation for their clients as to why a plugin is installed on the plugin list screen.  It also makes use of actions and filters so you can prevent anyone from either editing or viewing the plugin notes.
+This plugin will allow developers to provide documentation for their clients as to why a plugin is installed on the plugin list screen.  It also makes use of actions and filters so you can prevent anyone from either editing or viewing the extended plugin information.
 
 ## Installation ##
 
