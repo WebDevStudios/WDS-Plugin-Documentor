@@ -239,7 +239,9 @@ class WDS_Plugin_Documentor {
 	}
 
 	public function hidden_return_uri() {
-		echo '<input name="return_uri" type="hidden" value="'. esc_attr( urldecode( $_GET['return_uri'] ) ) .'"/>';
+		// Use wp_get_referer instead
+		$referrer = wp_get_referer();
+		echo '<input name="return_uri" type="hidden" value="'. esc_attr( $referrer ) .'"/>';
 	}
 
 	public function maybe_fix_delete_notes_redirect( $post_id ) {
@@ -266,7 +268,8 @@ class WDS_Plugin_Documentor {
 	}
 
 	public function add_return_uri( $url, $args = array() ) {
-		$args['return_uri'] = urlencode( site_url( $_SERVER['REQUEST_URI'] ) );
+		// Pass true, instead of the actual URL
+		$args['return_uri'] = true;
 		return add_query_arg( $args, $url );
 	}
 
