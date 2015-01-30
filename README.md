@@ -25,9 +25,11 @@ None at this point
 
 ## Screenshots
 
-![Toggle Plugins](https://raw.githubusercontent.com/WebDevStudios/Plugin-Documentor/master/screenshot-1.png)
+![Toggle Plugin notes](https://raw.githubusercontent.com/WebDevStudios/Plugin-Documentor/master/screenshot-1.png)  
+"Toggle Plugin Notes" inline link
 
-![Plugins Toggled](https://raw.githubusercontent.com/WebDevStudios/Plugin-Documentor/master/screenshot-2.png)
+![Plugin notess Toggled](https://raw.githubusercontent.com/WebDevStudios/Plugin-Documentor/master/screenshot-2.png)  
+Plugin Notes visible
 
 ## Changelog
 
