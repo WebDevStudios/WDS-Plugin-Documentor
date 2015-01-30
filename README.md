@@ -25,9 +25,9 @@ None at this point
 
 ## Screenshots
 
-![Toggle Plugins](https://github.com/WebDevStudios/Plugin-Documentor/raw/screenshot-1.png)
+![Toggle Plugins](https://raw.githubusercontent.com/WebDevStudios/Plugin-Documentor/master/screenshot-1.png)
 
-![Plugins Toggled](https://github.com/WebDevStudios/Plugin-Documentor/raw/screenshot-2.png)
+![Plugins Toggled](https://raw.githubusercontent.com/WebDevStudios/Plugin-Documentor/master/screenshot-2.png)
 
 ## Changelog
 
