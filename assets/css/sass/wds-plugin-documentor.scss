@@ -1,0 +1,44 @@
+/**
+ * WDS Plugin Documentor
+ * http://webdevstudios.com/
+ *
+ * Copyright (c) 2015 WebDevStudios, Jay Wood
+ * Licensed under the GPLv2+ license.
+ */
+
+.wds-plugin-doc {
+
+	.dashicons {
+		&.dashicons-plus-alt {
+			font-size: 1.2em;
+			line-height: 1.2em;
+			margin: 0 -.1em;
+		}
+	}
+
+	.edit-plugin-notes {
+		text-align: right;
+		margin-bottom: -.2em;
+	}
+
+	&.info td {
+		-webkit-box-shadow: inset 0px 12px 30px -25px #666, inset 0px -12px 30px -25px #666, inset 0 -1px 0 rgba(0,0,0,0.1);
+		box-shadow: inset 0px 12px 30px -25px #666, inset 0px -12px 30px -25px #666, inset 0 -1px 0 rgba(0,0,0,0.1);
+	}
+
+	.slider {
+		padding: 1.1em;
+
+		ul {
+			margin-left: 2em;
+			li {
+				list-style-type: disc;
+			}
+		}
+		ol {
+			li {
+				list-style-type: decimal;
+			}
+		}
+	}
+}
