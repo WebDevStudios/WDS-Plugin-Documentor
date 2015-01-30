@@ -95,7 +95,6 @@ class WDS_Plugin_Documentor {
 			'exclude_from_search' => true,
 			'query_var'           => false,
 			'rewrite'             => false,
-			'capability_type'     => $this->add_new_capability,
 			'supports'            => array( 'title', 'editor', 'revisions' ),
 		);
 
