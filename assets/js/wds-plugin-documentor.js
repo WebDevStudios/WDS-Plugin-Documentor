@@ -30,6 +30,13 @@ window.WDS_Plugin_Documentor = (function(window, document, $, undefined) {
 			$( 'body').on( 'click', 'a.wds-plugin-doc.has_info', app.show_info );
 		}
 
+		var $cols = app.$plugin_wrapper.find( 'thead > tr > *' ).length;
+
+		app.$info_blocks.each( function() {
+			var $this = $( this );
+			$this.find( 'td' ).attr( 'colspan', $cols );
+		} );
+
 		// Disable the post title, we want the plugin to determine the title.
 		if ( app.$edit_post_body.length ) {
 			app.$edit_post_title.prop( 'readonly', true );
