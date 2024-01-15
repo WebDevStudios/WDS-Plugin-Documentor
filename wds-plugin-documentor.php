@@ -42,6 +42,9 @@ class WDS_Plugin_Documentor {
 
 	const VERSION = '0.1.0';
 	protected $cpt = 'wds-plugin-doc';
+	protected $add_new_capability = 'manage_options';
+	protected $can_see_capability = 'manage_options';
+	protected $deleting_notes = false;
 
 	/**
 	 * Sets up our plugin
@@ -65,8 +68,8 @@ class WDS_Plugin_Documentor {
 		load_textdomain( 'wds_plugin_documentor', WP_LANG_DIR . '/wds_plugin_documentor/wds_plugin_documentor-' . $locale . '.mo' );
 		load_plugin_textdomain( 'wds_plugin_documentor', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
-		$this->add_new_capability = apply_filters( 'wds-plugin-documentor-add-new-capability', 'manage_options' );
-		$this->can_see_capability = apply_filters( 'wds-plugin-documentor-visible-capability', 'manage_options' );
+		$this->add_new_capability = apply_filters( 'wds-plugin-documentor-add-new-capability', $this->add_new_capability );
+		$this->can_see_capability = apply_filters( 'wds-plugin-documentor-visible-capability', $this->can_see_capability );
 
 		$labels = array(
 			'name'                => __( 'Plugin Info', 'wds_plugin_documentor' ),
@@ -253,17 +256,20 @@ class WDS_Plugin_Documentor {
 	}
 
 	public function maybe_fix_delete_notes_redirect( $post_id ) {
-		$this->deleting_notes = $this->cpt == get_post_type( $post_id ) ? get_the_title( $post_id ) : false;
+		$this->deleting_notes = $this->cpt === get_post_type( $post_id ) ? get_the_title( $post_id ) : false;
 	}
 
 	public function update_delete_notes_redirect( $location ) {
 		if (
-			isset( $this->deleting_notes )
-			&& $this->deleting_notes
-			&& false !== strpos( $location, 'plugins.php' )
-			&& false !== strpos( $location, 'deleted' )
+			! empty( $this->deleting_notes )
+			&& false !== strpos( $location, 'deleted=' )
 		) {
-			$location = add_query_arg( 'deleted-note', urlencode( $this->deleting_notes ), remove_query_arg( 'deleted', $location ) );
+			$pluginPage = false !== strpos( $location, 'plugins.php' );
+			$editNotesPage = false !== strpos( $location, 'edit.php?post_type=wds-plugin-doc' );
+
+			if ( $pluginPage || $editNotesPage ) {
+				$location = add_query_arg( 'deleted-note', urlencode( $this->deleting_notes ), admin_url( 'plugins.php' ) );
+			}
 		}
 
 		return $location;
@@ -343,9 +349,9 @@ class WDS_Plugin_Documentor {
 <div id="major-publishing-actions">
 	<div id="delete-action">
 		<?php
-		if ( current_user_can( 'delete_post', $post_id ) ) {
+		if ( current_user_can( $this->add_new_capability ) && current_user_can( 'delete_post', $post_id ) ) {
 			?>
-			<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post_id, '', true ); ?>"><?php _e( 'Delete permanently' ); ?></a>
+			<a class="wds-plugin-doc submitdelete deletion" href="<?php echo get_delete_post_link( $post_id, null, true ); ?>"><?php _e( 'Delete permanently' ); ?></a>
 			<?php
 		}
 		?>

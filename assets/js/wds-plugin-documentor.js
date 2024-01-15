@@ -52,6 +52,11 @@ window.WDS_Plugin_Documentor = window.WDS_Plugin_Documentor || {};
 			}
 		}
 
+		$('.wds-plugin-doc.submitdelete').on( 'click', function( evt ) {
+			if ( ! confirm( "You are about to delete this plugin's notes. 'Cancel' to stop, 'OK' to delete." ) ) {
+				evt.preventDefault();
+			}
+		});
 	};
 
 	app.show_info = function( evt ) {
