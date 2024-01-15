@@ -107,10 +107,10 @@ class WDS_Plugin_Documentor {
 	 * @return null
 	 */
 	public function admin_hooks() {
-		add_filter( 'plugin_row_meta', array( $this, 'add_plugin_notes' ), 10, 4 );
+		add_filter( 'plugin_row_meta', array( $this, 'add_plugin_notes' ), 10, 3 );
 		add_filter( 'enter_title_here', array( $this, 'filter_enter_title_here' ), 10, 2 );
 
-		add_action( 'after_plugin_row', array( $this, 'add_plugin_notes_row' ), 10, 3 );
+		add_action( 'after_plugin_row', array( $this, 'add_plugin_notes_row' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'setup_admin_scripts' ) );
 
 		add_filter( 'post_updated_messages', array( $this, 'filter_udpate_messages' ) );
@@ -123,13 +123,13 @@ class WDS_Plugin_Documentor {
 		add_action( 'all_admin_notices', array( $this, 'notice_for_deleting_notes' ) );
 	}
 
-	public function add_plugin_notes( $plugin_meta, $plugin_file, $plugin_data, $status ){
+	public function add_plugin_notes( $plugin_meta, $plugin_file, $plugin_data ){
 
 		if ( ! current_user_can( $this->can_see_capability ) || ! isset( $plugin_data['Name'] ) ) {
 			return $plugin_meta;
 		}
 
-		$post_info = get_page_by_title( $plugin_data['Name'], OBJECT, $this->cpt );
+		$post_info = $this->getPluginNotePost( $plugin_data['Name'] ?? '' );
 
 		if ( empty( $post_info ) && current_user_can( $this->add_new_capability ) ) {
 
@@ -151,9 +151,8 @@ class WDS_Plugin_Documentor {
 		return $plugin_meta;
 	}
 
-	public function add_plugin_notes_row( $plugin_file, $plugin_data, $status ) {
-
-		$post_info = get_page_by_title( $plugin_data['Name'], OBJECT, $this->cpt );
+	public function add_plugin_notes_row( $plugin_file, $plugin_data ) {
+		$post_info = $this->getPluginNotePost( $plugin_data['Name'] ?? '' );
 
 		if ( empty( $post_info->post_content ) || empty( $plugin_data['Name'] ) ) {
 			return;
@@ -265,6 +264,19 @@ class WDS_Plugin_Documentor {
 		if ( isset( $_GET['deleted-note'] ) ) {
 			echo '<div id="message" class="updated"><p>'. sprintf( __( 'Plugin notes for <strong>%s</strong> have been deleted.', 'wds_plugin_documentor' ), esc_attr( urldecode( $_GET['deleted-note'] ) ) ) .'</p></div>';
 		}
+	}
+
+	public function getPluginNotePost( $pluginName ) {
+		if ( empty( $pluginName ) ) {
+			return false;
+		}
+
+		$query = new WP_Query( array(
+			'post_type' => $this->cpt,
+			'title'     => sanitize_text_field( $pluginName ),
+			'posts_per_page' => 1,
+		) );
+		return $query->post;
 	}
 
 	public function add_return_uri( $url, $args = array() ) {
