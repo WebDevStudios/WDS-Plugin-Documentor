@@ -21,6 +21,7 @@
   },
   "keywords": [],
   "scripts": {
-    "watch": "grunt watch"
+    "watch": "grunt watch",
+    "build": "grunt"
   }
 }

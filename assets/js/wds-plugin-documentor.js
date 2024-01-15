@@ -1,8 +1,8 @@
 /**
- * WDS Plugin Documentor - v0.1.0 - 2015-01-29
+ * WDS Plugin Documentor - v0.1.0 - 2024-01-15
  * http://webdevstudios.com/
  *
- * Copyright (c) 2015;
+ * Copyright (c) 2024;
  * Licensed GPLv2+
  */
 /*jslint browser: true */
@@ -53,7 +53,7 @@ window.WDS_Plugin_Documentor = window.WDS_Plugin_Documentor || {};
 		}
 
 		$('.wds-plugin-doc.submitdelete').on( 'click', function( evt ) {
-			if ( ! confirm( "You are about to delete this plugin's notes. 'Cancel' to stop, 'OK' to delete." ) ) {
+			if ( ! window.confirm( "You are about to delete this plugin's notes. 'Cancel' to stop, 'OK' to delete." ) ) {
 				evt.preventDefault();
 			}
 		});
