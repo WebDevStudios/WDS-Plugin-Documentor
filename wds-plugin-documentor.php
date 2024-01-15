@@ -121,6 +121,11 @@ class WDS_Plugin_Documentor {
 		add_action( 'delete_post', array( $this, 'maybe_fix_delete_notes_redirect' ) );
 		add_filter( 'wp_redirect', array( $this, 'update_delete_notes_redirect' ) );
 		add_action( 'all_admin_notices', array( $this, 'notice_for_deleting_notes' ) );
+
+		add_action( 'add_meta_boxes_' . $this->cpt, function(){
+			remove_meta_box( 'submitdiv', $this->cpt, 'side' );
+			add_meta_box( 'updateBox', 'Save', array( $this, 'submit_meta_box' ), $this->cpt, 'side', 'core', array( '__back_compat_meta_box' => true ) );
+		} );
 	}
 
 	public function add_plugin_notes( $plugin_meta, $plugin_file, $plugin_data ){
@@ -264,6 +269,93 @@ class WDS_Plugin_Documentor {
 		if ( isset( $_GET['deleted-note'] ) ) {
 			echo '<div id="message" class="updated"><p>'. sprintf( __( 'Plugin notes for <strong>%s</strong> have been deleted.', 'wds_plugin_documentor' ), esc_attr( urldecode( $_GET['deleted-note'] ) ) ) .'</p></div>';
 		}
+	}
+
+	public function submit_meta_box( $post ) {
+		global $action;
+
+		$post_id          = (int) $post->ID;
+		$isAutoDraft      = $post->post_status == 'auto-draft';
+		?>
+<div class="submitbox" id="submitpost">
+
+<div id="minor-publishing">
+
+	<?php // Hidden submit button early on so that the browser chooses the right button when form is submitted with Return key. ?>
+	<div style="display:none;">
+		<?php submit_button( __( 'Save' ), '', 'save' ); ?>
+	</div>
+
+	<div id="misc-publishing-actions">
+		<?php
+		$date_string = __( '%1$s at %2$s' );
+		$date_format = _x( 'M j, Y', 'publish box date format' );
+		$time_format = _x( 'H:i', 'publish box time format' );
+
+		if ( $isAutoDraft ) {
+			$stamp = __( 'Publish <b>immediately</b>' );
+			$date  = sprintf(
+				$date_string,
+				date_i18n( $date_format, strtotime( current_time( 'mysql' ) ) ),
+				date_i18n( $time_format, strtotime( current_time( 'mysql' ) ) )
+			);
+		} else {
+			$stamp = __( 'Published on: %s' );
+			$date = sprintf(
+				$date_string,
+				date_i18n( $date_format, strtotime( $post->post_date ) ),
+				date_i18n( $time_format, strtotime( $post->post_date ) )
+			);
+		}
+		?>
+		<div class="misc-pub-section curtime misc-pub-curtime">
+			<span id="timestamp">
+				<?php printf( $stamp, '<b>' . $date . '</b>' ); ?>
+			</span>
+			<fieldset id="timestampdiv" class="hide-if-js">
+				<legend class="screen-reader-text">
+					<?php
+					/* translators: Hidden accessibility text. */
+					_e( 'Date and time' );
+					?>
+				</legend>
+				<?php touch_time( ( 'edit' === $action ), 1 ); ?>
+			</fieldset>
+			<?php if ( ! $isAutoDraft ) : ?>
+				<div>
+					<span id="timestamp">
+						Last Modified: <b><?php echo date_i18n( $date_format, strtotime( $post->post_modified ) ); ?></b>
+					</span>
+				</div>
+			<?php endif; ?>
+		</div>
+		<?php
+
+		?>
+	</div>
+	<div class="clear"></div>
+</div>
+
+<div id="major-publishing-actions">
+	<div id="delete-action">
+		<?php
+		if ( current_user_can( 'delete_post', $post_id ) ) {
+			?>
+			<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post_id, '', true ); ?>"><?php _e( 'Delete permanently' ); ?></a>
+			<?php
+		}
+		?>
+	</div>
+
+	<div id="publishing-action">
+		<span class="spinner"></span>
+		<?php submit_button( __( 'Update' ), 'primary large', 'save', false, array( 'id' => 'publish' ) ); ?>
+	</div>
+	<div class="clear"></div>
+</div>
+
+</div>
+		<?php
 	}
 
 	public function getPluginNotePost( $pluginName ) {
