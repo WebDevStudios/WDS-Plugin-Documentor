@@ -206,6 +206,10 @@ class WDS_Plugin_Documentor {
 		$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_enqueue_style( 'wds-plugin-doc', $this->url( "assets/css/wds-plugin-documentor{$min}.css" ), null, self::VERSION );
 		wp_enqueue_script( 'wds-plugin-doc', $this->url( "assets/js/wds-plugin-documentor{$min}.js" ), array( 'jquery' ), self::VERSION, true );
+		// Send plugins admin_url to JS
+		wp_localize_script( 'wds-plugin-doc', 'WDS_Plugin_Documentor', array(
+			'plugins_url' => admin_url( 'plugins.php' ),
+		) );
 	}
 
 	public function filter_udpate_messages( $messages ) {
