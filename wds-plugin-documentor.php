@@ -42,6 +42,9 @@ class WDS_Plugin_Documentor {
 
 	const VERSION = '0.1.0';
 	protected $cpt = 'wds-plugin-doc';
+	protected $add_new_capability = 'manage_options';
+	protected $can_see_capability = 'manage_options';
+	protected $deleting_notes = false;
 
 	/**
 	 * Sets up our plugin
@@ -65,8 +68,8 @@ class WDS_Plugin_Documentor {
 		load_textdomain( 'wds_plugin_documentor', WP_LANG_DIR . '/wds_plugin_documentor/wds_plugin_documentor-' . $locale . '.mo' );
 		load_plugin_textdomain( 'wds_plugin_documentor', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
-		$this->add_new_capability = apply_filters( 'wds-plugin-documentor-add-new-capability', 'manage_options' );
-		$this->can_see_capability = apply_filters( 'wds-plugin-documentor-visible-capability', 'manage_options' );
+		$this->add_new_capability = apply_filters( 'wds-plugin-documentor-add-new-capability', $this->add_new_capability );
+		$this->can_see_capability = apply_filters( 'wds-plugin-documentor-visible-capability', $this->can_see_capability );
 
 		$labels = array(
 			'name'                => __( 'Plugin Info', 'wds_plugin_documentor' ),
@@ -107,10 +110,10 @@ class WDS_Plugin_Documentor {
 	 * @return null
 	 */
 	public function admin_hooks() {
-		add_filter( 'plugin_row_meta', array( $this, 'add_plugin_notes' ), 10, 4 );
+		add_filter( 'plugin_row_meta', array( $this, 'add_plugin_notes' ), 10, 3 );
 		add_filter( 'enter_title_here', array( $this, 'filter_enter_title_here' ), 10, 2 );
 
-		add_action( 'after_plugin_row', array( $this, 'add_plugin_notes_row' ), 10, 3 );
+		add_action( 'after_plugin_row', array( $this, 'add_plugin_notes_row' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'setup_admin_scripts' ) );
 
 		add_filter( 'post_updated_messages', array( $this, 'filter_udpate_messages' ) );
@@ -121,15 +124,20 @@ class WDS_Plugin_Documentor {
 		add_action( 'delete_post', array( $this, 'maybe_fix_delete_notes_redirect' ) );
 		add_filter( 'wp_redirect', array( $this, 'update_delete_notes_redirect' ) );
 		add_action( 'all_admin_notices', array( $this, 'notice_for_deleting_notes' ) );
+
+		add_action( 'add_meta_boxes_' . $this->cpt, function(){
+			remove_meta_box( 'submitdiv', $this->cpt, 'side' );
+			add_meta_box( 'updateBox', 'Save', array( $this, 'submit_meta_box' ), $this->cpt, 'side', 'core', array( '__back_compat_meta_box' => true ) );
+		} );
 	}
 
-	public function add_plugin_notes( $plugin_meta, $plugin_file, $plugin_data, $status ){
+	public function add_plugin_notes( $plugin_meta, $plugin_file, $plugin_data ){
 
 		if ( ! current_user_can( $this->can_see_capability ) || ! isset( $plugin_data['Name'] ) ) {
 			return $plugin_meta;
 		}
 
-		$post_info = get_page_by_title( $plugin_data['Name'], OBJECT, $this->cpt );
+		$post_info = $this->getPluginNotePost( $plugin_data['Name'] ?? '' );
 
 		if ( empty( $post_info ) && current_user_can( $this->add_new_capability ) ) {
 
@@ -151,9 +159,8 @@ class WDS_Plugin_Documentor {
 		return $plugin_meta;
 	}
 
-	public function add_plugin_notes_row( $plugin_file, $plugin_data, $status ) {
-
-		$post_info = get_page_by_title( $plugin_data['Name'], OBJECT, $this->cpt );
+	public function add_plugin_notes_row( $plugin_file, $plugin_data ) {
+		$post_info = $this->getPluginNotePost( $plugin_data['Name'] ?? '' );
 
 		if ( empty( $post_info->post_content ) || empty( $plugin_data['Name'] ) ) {
 			return;
@@ -202,6 +209,10 @@ class WDS_Plugin_Documentor {
 		$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_enqueue_style( 'wds-plugin-doc', $this->url( "assets/css/wds-plugin-documentor{$min}.css" ), null, self::VERSION );
 		wp_enqueue_script( 'wds-plugin-doc', $this->url( "assets/js/wds-plugin-documentor{$min}.js" ), array( 'jquery' ), self::VERSION, true );
+		// Send plugins admin_url to JS
+		wp_localize_script( 'wds-plugin-doc', 'WDS_Plugin_Documentor', array(
+			'plugins_url' => admin_url( 'plugins.php' ),
+		) );
 	}
 
 	public function filter_udpate_messages( $messages ) {
@@ -245,17 +256,20 @@ class WDS_Plugin_Documentor {
 	}
 
 	public function maybe_fix_delete_notes_redirect( $post_id ) {
-		$this->deleting_notes = $this->cpt == get_post_type( $post_id ) ? get_the_title( $post_id ) : false;
+		$this->deleting_notes = $this->cpt === get_post_type( $post_id ) ? get_the_title( $post_id ) : false;
 	}
 
 	public function update_delete_notes_redirect( $location ) {
 		if (
-			isset( $this->deleting_notes )
-			&& $this->deleting_notes
-			&& false !== strpos( $location, 'plugins.php' )
-			&& false !== strpos( $location, 'deleted' )
+			! empty( $this->deleting_notes )
+			&& false !== strpos( $location, 'deleted=' )
 		) {
-			$location = add_query_arg( 'deleted-note', urlencode( $this->deleting_notes ), remove_query_arg( 'deleted', $location ) );
+			$pluginPage = false !== strpos( $location, 'plugins.php' );
+			$editNotesPage = false !== strpos( $location, 'edit.php?post_type=wds-plugin-doc' );
+
+			if ( $pluginPage || $editNotesPage ) {
+				$location = add_query_arg( 'deleted-note', urlencode( $this->deleting_notes ), admin_url( 'plugins.php' ) );
+			}
 		}
 
 		return $location;
@@ -265,6 +279,106 @@ class WDS_Plugin_Documentor {
 		if ( isset( $_GET['deleted-note'] ) ) {
 			echo '<div id="message" class="updated"><p>'. sprintf( __( 'Plugin notes for <strong>%s</strong> have been deleted.', 'wds_plugin_documentor' ), esc_attr( urldecode( $_GET['deleted-note'] ) ) ) .'</p></div>';
 		}
+	}
+
+	public function submit_meta_box( $post ) {
+		global $action;
+
+		$post_id          = (int) $post->ID;
+		$isAutoDraft      = $post->post_status == 'auto-draft';
+		?>
+<div class="submitbox" id="submitpost">
+
+<div id="minor-publishing">
+
+	<?php // Hidden submit button early on so that the browser chooses the right button when form is submitted with Return key. ?>
+	<div style="display:none;">
+		<?php submit_button( __( 'Save' ), '', 'save' ); ?>
+	</div>
+
+	<div id="misc-publishing-actions">
+		<?php
+		$date_string = __( '%1$s at %2$s' );
+		$date_format = _x( 'M j, Y', 'publish box date format' );
+		$time_format = _x( 'H:i', 'publish box time format' );
+
+		if ( $isAutoDraft ) {
+			$stamp = __( 'Publish <b>immediately</b>' );
+			$date  = sprintf(
+				$date_string,
+				date_i18n( $date_format, strtotime( current_time( 'mysql' ) ) ),
+				date_i18n( $time_format, strtotime( current_time( 'mysql' ) ) )
+			);
+		} else {
+			$stamp = __( 'Published on: %s' );
+			$date = sprintf(
+				$date_string,
+				date_i18n( $date_format, strtotime( $post->post_date ) ),
+				date_i18n( $time_format, strtotime( $post->post_date ) )
+			);
+		}
+		?>
+		<div class="misc-pub-section curtime misc-pub-curtime">
+			<span id="timestamp">
+				<?php printf( $stamp, '<b>' . $date . '</b>' ); ?>
+			</span>
+			<fieldset id="timestampdiv" class="hide-if-js">
+				<legend class="screen-reader-text">
+					<?php
+					/* translators: Hidden accessibility text. */
+					_e( 'Date and time' );
+					?>
+				</legend>
+				<?php touch_time( ( 'edit' === $action ), 1 ); ?>
+			</fieldset>
+			<?php if ( ! $isAutoDraft ) : ?>
+				<div>
+					<span id="timestamp">
+						Last Modified: <b><?php echo date_i18n( $date_format, strtotime( $post->post_modified ) ); ?></b>
+					</span>
+				</div>
+			<?php endif; ?>
+		</div>
+		<?php
+
+		?>
+	</div>
+	<div class="clear"></div>
+</div>
+
+<div id="major-publishing-actions">
+	<div id="delete-action">
+		<?php
+		if ( current_user_can( $this->add_new_capability ) && current_user_can( 'delete_post', $post_id ) ) {
+			?>
+			<a class="wds-plugin-doc submitdelete deletion" href="<?php echo get_delete_post_link( $post_id, null, true ); ?>"><?php _e( 'Delete permanently' ); ?></a>
+			<?php
+		}
+		?>
+	</div>
+
+	<div id="publishing-action">
+		<span class="spinner"></span>
+		<?php submit_button( __( 'Update' ), 'primary large', 'save', false, array( 'id' => 'publish' ) ); ?>
+	</div>
+	<div class="clear"></div>
+</div>
+
+</div>
+		<?php
+	}
+
+	public function getPluginNotePost( $pluginName ) {
+		if ( empty( $pluginName ) ) {
+			return false;
+		}
+
+		$query = new WP_Query( array(
+			'post_type' => $this->cpt,
+			'title'     => sanitize_text_field( $pluginName ),
+			'posts_per_page' => 1,
+		) );
+		return $query->post;
 	}
 
 	public function add_return_uri( $url, $args = array() ) {

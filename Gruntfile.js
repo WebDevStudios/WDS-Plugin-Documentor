@@ -64,7 +64,7 @@ module.exports = function( grunt ) {
 				options: {
 					banner: compactBannerTemplate,
 					mangle: {
-						except: ['jQuery']
+						// except: ['jQuery']
 					}
 				}
 			}
