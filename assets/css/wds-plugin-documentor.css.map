@@ -1,7 +1,1 @@
-{
-"version": 3,
-"mappings": "AAAA;;;;;;GAMG;AAKD,6CAAqB;EACpB,SAAS,EAAE,KAAK;EAChB,WAAW,EAAE,KAAK;EAClB,MAAM,EAAE,OAAO;;AAIjB,kCAAmB;EAClB,UAAU,EAAE,KAAK;EACjB,aAAa,EAAE,KAAK;;AAGrB,uBAAU;EAET,UAAU,EAAE,OAAO;EACnB,UAAU,EAAE,iCAAiC;;AAG9C,uBAAQ;EACP,OAAO,EAAE,KAAK;;AAEd,0BAAG;EACF,WAAW,EAAE,GAAG;;AAChB,6BAAG;EACF,eAAe,EAAE,IAAI;;AAItB,6BAAG;EACF,eAAe,EAAE,OAAO",
-"sources": ["sass/wds-plugin-documentor.scss"],
-"names": [],
-"file": "wds-plugin-documentor.css"
-}
+{"version":3,"sourceRoot":"","sources":["sass/wds-plugin-documentor.scss"],"names":[],"mappings":"AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAWE;EACC;EACA;EACA;;AAIF;EACC;EACA;;AAGD;EAEC;EACA;;AAGD;EACC;;AAEA;EACC;;AACA;EACC;;AAID;EACC","file":"wds-plugin-documentor.css"}
