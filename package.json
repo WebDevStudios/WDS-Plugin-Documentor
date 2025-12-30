@@ -10,18 +10,12 @@
     "url": "http://webdevstudios.com"
   },
   "devDependencies": {
-    "grunt": "^1.6.1",
-    "grunt-contrib-concat": "~2.1.0",
-    "grunt-contrib-cssmin": "^5.0.0",
-    "grunt-contrib-jshint": "^3.2.0",
-    "grunt-contrib-nodeunit": "^5.0.0",
-    "grunt-contrib-sass": "~2.0.0",
-    "grunt-contrib-uglify": "^5.2.2",
-    "grunt-contrib-watch": "^1.1.0"
+    "sass": "^1.97.1",
+    "uglify-js": "^3.19.3"
   },
   "keywords": [],
   "scripts": {
-    "watch": "grunt watch",
-    "build": "grunt"
+    "scripts": "uglifyjs assets/js/src/wds-plugin-documentor.js -b -o  assets/js/wds-plugin-documentor.js && uglifyjs assets/js/wds-plugin-documentor.js -m -c --source-map -o assets/js/wds-plugin-documentor.min.js",
+    "styles": "sass assets/css/sass/wds-plugin-documentor.scss assets/css/wds-plugin-documentor.css && sass --style=compressed assets/css/sass/wds-plugin-documentor.scss assets/css/wds-plugin-documentor.min.css"
   }
 }
